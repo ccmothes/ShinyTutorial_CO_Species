@@ -216,18 +216,18 @@ server <- function(input, output){
   
   output$map <- renderTmap({
     
-    #Filter species selected
-    species <- subset(occ_sp, Species %in% input$species)
+    #Filter data selected
+    species <- subset(occ_sp, Species %in% input$species) %>%
+      subset(year >= input$year[1] &
+               year <= input$year[2]) %>%
+      subset(month %in% input$month) %>%
+      subset(elevation >= input$elevation[1] &
+               elevation <= input$elevation[2])
     
-    #Filter elevation selected
-    species_elev <-
-      subset(species,
-             elevation >= input$elevation[1] & elevation <= input$elevation[2])
-    
-    #render interactive tmap
+    #render map with filtered data
     tmap::tmap_mode("view")
-    tmap::tm_basemap("OpenStreetMap")+
-      tmap::tm_shape(shp = species_elev)+
+    tmap::tm_basemap("OpenStreetMap") +
+      tmap::tm_shape(shp = species) +
       tmap::tm_dots(
         col = "Species",
         size = 0.1,
@@ -235,7 +235,7 @@ server <- function(input, output){
         title = "Species Occurences",
         popup.vars = c(
           "Record Type" = "basisOfRecord",
-          "Year" = "year",
+          "Year" = "year_char",
           "Month" = "month",
           "Elevation (m)" = "elevation"
         ),
@@ -246,7 +246,6 @@ server <- function(input, output){
     
     
   })
-  
   
   
 }
